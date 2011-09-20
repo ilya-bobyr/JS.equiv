@@ -12,8 +12,14 @@ window.equiv = function () {
         if (typeof o === "string") {
             return "string";
 
+        } else if (o instanceof String) {
+            return "stringObj";
+
         } else if (typeof o === "boolean") {
             return "boolean";
+
+        } else if (o instanceof Boolean) {
+            return "booleanObj";
 
         } else if (typeof o === "number") {
 
@@ -21,6 +27,14 @@ window.equiv = function () {
                 return "nan";
             } else {
                 return "number";
+            }
+
+        } else if (o instanceof Number) {
+
+            if (isNaN(o.valueOf())) {
+                return "nan";
+            } else {
+                return "numberObj";
             }
 
         } else if (typeof o === "undefined") {
@@ -67,15 +81,23 @@ window.equiv = function () {
 
     var callbacks = function () {
 
-        // for string, boolean, number and null
+        // for string, boolean and number values and null
         function useStrictEquality(b, a) {
             return a === b;
         }
 
+        // for string, boolean and number objects
+        function useStrictEqualityForObjects(b, a) {
+            return hoozit(b) === hoozit(a) && a.valueOf() === b.valueOf();
+        }
+
         return {
             "string": useStrictEquality,
+            "stringObj": useStrictEqualityForObjects,
             "boolean": useStrictEquality,
+            "booleanObj": useStrictEqualityForObjects,
             "number": useStrictEquality,
+            "numberObj": useStrictEqualityForObjects,
             "null": useStrictEquality,
             "undefined": useStrictEquality,
 
@@ -83,9 +105,7 @@ window.equiv = function () {
                 return isNaN(b);
             },
 
-            "date": function (b, a) {
-                return hoozit(b) === "date" && a.valueOf() === b.valueOf();
-            },
+            "date": useStrictEqualityForObjects,
 
             "regexp": function (b, a) {
                 return hoozit(b) === "regexp" &&
